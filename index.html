@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentasi: Pushdown Automata (PDA)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .slide {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .slide.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .slide-content h1 {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 2.5rem;
+            line-height: 1.2;
+            margin-bottom: 0.5rem;
+        }
+        .slide-content h2 {
+            font-weight: 600;
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+        .slide-content h3 {
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #94a3b8;
+        }
+        .slide-content ul {
+            list-style-position: inside;
+            list-style-type: disc;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+        .slide-content li {
+            margin-bottom: 0.5rem;
+        }
+        .slide-content code {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .slide-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .slide-content th, .slide-content td {
+            border: 1px solid #4a5568;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        .slide-content th {
+            background-color: #2d3748;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 flex flex-col items-center justify-center min-h-screen p-4">
+
+    <!-- Container Utama Presentasi -->
+    <div id="presentation-container" class="w-full max-w-4xl aspect-video bg-gray-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+        
+        <!-- Area Konten Slide -->
+        <main id="slide-area" class="flex-grow flex items-center justify-center p-8 md:p-12">
+            <!-- Konten slide akan dimasukkan di sini oleh JavaScript -->
+        </main>
+
+        <!-- Footer Navigasi -->
+        <footer class="bg-gray-900 bg-opacity-50 p-4 flex items-center justify-between border-t border-gray-700">
+            <div class="text-sm text-gray-400">
+                Disusun oleh: Tim Gemini
+            </div>
+            <div class="flex items-center gap-4">
+                <button id="prev-btn" class="px-4 py-2 bg-gray-700 hover:bg-blue-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Sebelumnya</button>
+                <span id="slide-counter" class="text-lg font-semibold text-gray-300"></span>
+                <button id="next-btn" class="px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Berikutnya</button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // --- DATA KONTEN SLIDE ---
+        // Semua konten dari dokumen Markdown dikonversi ke HTML dan disimpan di sini.
+        const slides = [
+            // Slide 1: Judul
+            `
+            <div class="text-center slide-content">
+                <div class="mb-4 text-blue-400 text-sm font-bold tracking-widest uppercase">Teori Bahasa & Automata</div>
+                <h1>Pushdown Automata (PDA)</h1>
+                <h2 class="text-2xl text-gray-400">Mesin Abstrak dengan Kekuatan Memori</h2>
+            </div>
+            `,
+            // Slide 2: Agenda
+            `
+            <div class="w-full slide-content">
+                <h2 class="text-center">Agenda Pembahasan 🗺️</h2>
+                <ul class="text-xl space-y-3 mt-6">
+                    <li><span class="text-blue-400 mr-2">1.</span>Kilas Balik & Keterbatasan: Mengapa FA tidak cukup?</li>
+                    <li><span class="text-blue-400 mr-2">2.</span>Perkenalan Pushdown Automata: Solusi untuk keterbatasan.</li>
+                    <li><span class="text-blue-400 mr-2">3.</span>Komponen Utama: Apa saja yang membentuk sebuah PDA?</li>
+                    <li><span class="text-blue-400 mr-2">4.</span>Definisi Formal: Membedah PDA dengan 7-Tuple.</li>
+                    <li><span class="text-blue-400 mr-2">5.</span>Mekanisme Kerja: Bagaimana PDA memproses input?</li>
+                    <li><span class="text-blue-400 mr-2">6.</span>Studi Kasus: Implementasi PDA untuk bahasa L = {aⁿbⁿ}.</li>
+                    <li><span class="text-blue-400 mr-2">7.</span>Jenis-jenis PDA: Deterministic vs. Nondeterministic.</li>
+                    <li><span class="text-blue-400 mr-2">8.</span>Kesimpulan & Hubungan dengan Tata Bahasa Bebas Konteks (CFG).</li>
+                </ul>
+            </div>
+            `,
+            // Slide 3: Keterbatasan FA
+            `
+            <div class="w-full slide-content">
+                <h2 class="text-center">Mengapa Finite Automata (FA) Tidak Cukup? 🤔</h2>
+                <div class="mt-8 text-lg">
+                    <p class="mb-4"><strong>Finite Automata (FA) tidak memiliki memori.</strong></p>
+                    <p class="mb-6">Ia tidak bisa "mengingat" berapa banyak simbol yang telah dibaca.</p>
+                    <h3>Contoh Kasus:</h3>
+                    <p class="mb-2">Bahasa <strong>L = {aⁿbⁿ | n ≥ 1}</strong> (contoh: <code>ab</code>, <code>aabb</code>, <code>aaabbb</code>)</p>
+                    <ul class="list-disc pl-5">
+                        <li>Untuk mengenali bahasa ini, mesin harus <strong>menghitung</strong> jumlah <code>a</code> dan membandingkannya dengan jumlah <code>b</code>.</li>
+                        <li>FA tidak bisa melakukan ini. Setelah membaca semua <code>a</code>, ia "lupa" berapa jumlahnya.</li>
+                    </ul>
+                    <p class="mt-8 text-center text-2xl font-bold text-blue-400">Kita butuh mesin yang lebih kuat!</p>
+                </div>
+            </div>
+            `,
+            // Slide 4: Solusi PDA
+            `
+            <div class="w-full text-center slide-content">
+                <h2 class="text-center">Solusinya: Pushdown Automata (PDA) 🚀</h2>
+                <p class="mt-6 text-2xl">Pushdown Automata = <strong>Finite Automata + sebuah STACK</strong></p>
+                <p class="mt-4 text-lg text-gray-400">Stack memberikan PDA kemampuan memori yang tak terbatas, namun dengan akses yang terbatas.</p>
+                <div class="mt-8 p-6 bg-gray-700 rounded-lg flex justify-around items-center">
+                    <span class="text-xl">Input Tape</span>
+                    <span class="text-3xl font-bold text-blue-400">→</span>
+                    <span class="text-xl p-4 border-2 border-dashed border-gray-500 rounded-lg">Control Unit</span>
+                    <span class="text-3xl font-bold text-blue-400">↔</span>
+                    <span class="text-xl">Stack</span>
+                </div>
+            </div>
+            `,
+            // Slide 5: Stack
+            `
+            <div class="w-full text-center slide-content">
+                <h2 class="text-center">Komponen Kunci: STACK 🥞</h2>
+                <p class="mt-6 text-lg">Stack adalah struktur data di mana elemen terakhir yang masuk adalah elemen pertama yang keluar (<strong>LIFO: Last-In, First-Out</strong>).</p>
+                <div class="mt-8 flex justify-around gap-4">
+                    <div class="p-4 bg-gray-700 rounded-lg w-1/3">
+                        <h3 class="mt-0">PUSH</h3>
+                        <p class="text-gray-400">Menambahkan elemen ke puncak tumpukan.</p>
+                    </div>
+                    <div class="p-4 bg-gray-700 rounded-lg w-1/3">
+                        <h3 class="mt-0">POP</h3>
+                        <p class="text-gray-400">Menghapus elemen dari puncak tumpukan.</p>
+                    </div>
+                    <div class="p-4 bg-gray-700 rounded-lg w-1/3">
+                        <h3 class="mt-0">PEEK/TOP</h3>
+                        <p class="text-gray-400">Melihat elemen di puncak tumpukan.</p>
+                    </div>
+                </div>
+                <p class="mt-8 text-lg">Analogi sempurna adalah <strong>tumpukan piring</strong>.</p>
+            </div>
+            `,
+            // Slide 6: Definisi Formal
+            `
+            <div class="w-full slide-content">
+                <h2 class="text-center">Definisi Formal PDA (7-Tuple) ⚙️</h2>
+                <p class="text-center mt-4 text-lg">Sebuah PDA secara formal didefinisikan sebagai 7-tuple: <strong>M = (Q, Σ, Γ, δ, q₀, Z₀, F)</strong></p>
+                <ul class="mt-6 text-lg space-y-2">
+                    <li><strong>Q:</strong> Himpunan <strong>state</strong> yang terbatas.</li>
+                    <li><strong>Σ:</strong> Himpunan simbol <strong>input</strong> (alfabet input).</li>
+                    <li><strong>Γ:</strong> Himpunan simbol <strong>stack</strong> (alfabet stack).</li>
+                    <li><strong>δ:</strong> <strong>Fungsi transisi</strong>, "otak" dari PDA. <code>δ: Q × (Σ ∪ {ε}) × Γ → P(Q × Γ*)</code></li>
+                    <li><strong>q₀:</strong> <strong>State awal</strong> (q₀ ∈ Q).</li>
+                    <li><strong>Z₀:</strong> <strong>Simbol awal stack</strong> (Z₀ ∈ Γ).</li>
+                    <li><strong>F:</strong> Himpunan <strong>state penerima</strong> (F ⊆ Q).</li>
+                </ul>
+            </div>
+            `,
+            // Slide 7: Fungsi Transisi
+            `
+            <div class="w-full slide-content">
+                <h2 class="text-center">Membedah Fungsi Transisi (δ)</h2>
+                <p class="text-center mt-4 text-lg">Fungsi transisi menentukan langkah PDA selanjutnya.</p>
+                <div class="mt-6 p-4 bg-gray-700 rounded-lg text-center">
+                    <p class="text-2xl font-mono">δ(q, a, X) = {(p, Y)}</p>
+                </div>
+                <p class="mt-6 text-lg"><strong>Cara membacanya:</strong> "Jika mesin di state <code>q</code>, membaca input <code>a</code>, dan puncak stack adalah <code>X</code>... maka mesin pindah ke state <code>p</code> dan mengganti <code>X</code> dengan string <code>Y</code>."</p>
+                <ul class="mt-4 text-lg space-y-1">
+                    <li>Jika <code>a = ε</code>, mesin bergerak tanpa membaca input.</li>
+                    <li>Jika <code>Y = ε</code>, artinya operasi <strong>POP</strong>.</li>
+                    <li>Jika <code>Y = AX</code>, artinya <strong>PUSH</strong> A di atas X.</li>
+                    <li>Jika <code>Y = X</code>, artinya stack tidak berubah.</li>
+                </ul>
+            </div>
+            `,
+            // Slide 8: Studi Kasus
+            `
+            <div class="w-full slide-content">
+                <h2 class="text-center">Studi Kasus: L = {aⁿbⁿ | n ≥ 1}</h2>
+                <h3>Logika Sederhana:</h3>
+                <ol class="list-decimal list-inside space-y-2 text-lg">
+                    <li>Baca semua <code>a</code>. Untuk setiap <code>a</code>, <strong>PUSH</strong> simbol <code>X</code> ke stack.</li>
+                    <li>Setelah semua <code>a</code> habis, mulai baca <code>b</code>. Untuk setiap <code>b</code>, <strong>POP</strong> satu <code>X</code> dari stack.</li>
+                    <li>Jika input habis dan stack kosong (hanya Z₀), string diterima.</li>
+                </ol>
+                <h3 class="mt-6">Definisi PDA:</h3>
+                <ul class="font-mono text-lg grid grid-cols-3 gap-2">
+                    <li>Q = {q₀, q₁, q₂}</li>
+                    <li>Σ = {a, b}</li>
+                    <li>Γ = {X, Z₀}</li>
+                    <li>q₀ = q₀</li>
+                    <li>Z₀ = Z₀</li>
+                    <li>F = {q₂}</li>
+                </ul>
+            </div>
+            `,
+            // Slide 9: Transisi Studi Kasus
+            `
+            <div class="w-full slide-content">
+                <h2 class="text-center">Studi Kasus: Transisi untuk {aⁿbⁿ}</h2>
+                <ol class="list-decimal list-inside space-y-3 mt-6 text-lg">
+                    <li><code>δ(q₀, a, Z₀) = {(q₀, XZ₀)}</code><br><em class="text-gray-400 text-base">Saat di awal, baca 'a', PUSH 'X'.</em></li>
+                    <li><code>δ(q₀, a, X) = {(q₀, XX)}</code><br><em class="text-gray-400 text-base">Baca 'a' lagi, PUSH 'X' lagi.</em></li>
+                    <li><code>δ(q₀, b, X) = {(q₁, ε)}</code><br><em class="text-gray-400 text-base">Pertama kali baca 'b', pindah state, POP 'X'.</em></li>
+                    <li><code>δ(q₁, b, X) = {(q₁, ε)}</code><br><em class="text-gray-400 text-base">Baca 'b' lagi, POP 'X'.</em></li>
+                    <li><code>δ(q₁, ε, Z₀) = {(q₂, Z₀)}</code><br><em class="text-gray-400 text-base">Input habis, stack kosong, pindah ke state final. Diterima!</em></li>
+                </ol>
+            </div>
+            `,
+            // Slide 10: Simulasi
+            `
+            <div class="w-full slide-content">
+                <h2 class="text-center">Simulasi: Memproses "aabb"</h2>
+                <table>
+                    <thead>
+                        <tr><th>Langkah</th><th>State</th><th>Input Tersisa</th><th>Stack</th><th>Transisi</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>q₀</td><td><code>aabb</code></td><td><code>Z₀</code></td><td>-</td></tr>
+                        <tr><td>2</td><td>q₀</td><td><code>abb</code></td><td><code>XZ₀</code></td><td>δ(q₀, a, Z₀)</td></tr>
+                        <tr><td>3</td><td>q₀</td><td><code>bb</code></td><td><code>XXZ₀</code></td><td>δ(q₀, a, X)</td></tr>
+                        <tr><td>4</td><td>q₁</td><td><code>b</code></td><td><code>XZ₀</code></td><td>δ(q₀, b, X)</td></tr>
+                        <tr><td>5</td><td>q₁</td><td><code>ε</code></td><td><code>Z₀</code></td><td>δ(q₁, b, X)</td></tr>
+                        <tr><td>6</td><td>q₂</td><td><code>ε</code></td><td><code>Z₀</code></td><td>δ(q₁, ε, Z₀)</td></tr>
+                    </tbody>
+                </table>
+                <p class="mt-4 text-center text-xl font-bold text-green-400">Hasil: Mesin berhenti di state q₂ (final). String "aabb" diterima. ✅</p>
+            </div>
+            `,
+            // Slide 11: Cara Penerimaan
+            `
+            <div class="w-full slide-content">
+                <h2 class="text-center">Dua Cara Penerimaan String</h2>
+                <p class="text-center mt-4 text-lg">Sebuah PDA dapat menerima string dengan dua cara yang setara kekuatannya:</p>
+                <div class="mt-6 grid md:grid-cols-2 gap-6">
+                    <div class="p-6 bg-gray-700 rounded-lg">
+                        <h3>1. Penerimaan dengan State Final</h3>
+                        <p class="text-gray-400">String diterima jika setelah seluruh input dibaca, PDA berada di salah satu <em>final state</em>. (Seperti contoh <code>aⁿbⁿ</code>).</p>
+                    </div>
+                    <div class="p-6 bg-gray-700 rounded-lg">
+                        <h3>2. Penerimaan dengan Stack Kosong</h3>
+                        <p class="text-gray-400">String diterima jika setelah seluruh input dibaca, stack menjadi kosong. <em>Final state</em> tidak relevan.</p>
+                    </div>
+                </div>
+            </div>
+            `,
+            // Slide 12: DPDA vs NPDA
+            `
+            <div class="w-full slide-content">
+                <h2 class="text-center">Deterministic vs. Nondeterministic PDA</h2>
+                <div class="mt-6 grid md:grid-cols-2 gap-6">
+                    <div class="p-6 border border-blue-500 rounded-lg">
+                        <h3>Deterministic PDA (DPDA)</h3>
+                        <ul class="list-disc pl-5 text-gray-400">
+                            <li>Hanya ada <strong>satu</strong> kemungkinan transisi untuk setiap kondisi.</li>
+                            <li>Tidak ada transisi ε (atau sangat terbatas).</li>
+                            <li>Mengenali <strong>Bahasa Bebas Konteks Deterministik</strong>.</li>
+                        </ul>
+                    </div>
+                    <div class="p-6 border border-purple-500 rounded-lg">
+                        <h3>Nondeterministic PDA (NPDA)</h3>
+                        <ul class="list-disc pl-5 text-gray-400">
+                            <li>Bisa memiliki <strong>beberapa pilihan</strong> transisi.</li>
+                            <li>Bisa menggunakan transisi ε secara bebas.</li>
+                            <li class="font-bold text-gray-200">Lebih kuat dari DPDA!</li>
+                            <li>Mengenali semua <strong>Bahasa Bebas Konteks</strong> (Contoh: palindrom <code>wwᴿ</code>).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            `,
+            // Slide 13: Kesimpulan
+            `
+            <div class="w-full slide-content">
+                <h2 class="text-center">Hubungan dengan CFG & Kesimpulan</h2>
+                <div class="mt-6 p-4 bg-gray-900 border border-blue-400 rounded-lg">
+                    <h3 class="mt-0">Teorema Fundamental:</h3>
+                    <p class="text-lg text-center">"Sebuah bahasa disebut <strong>Bahasa Bebas Konteks (CFL)</strong> jika dan hanya jika ada sebuah <strong>Pushdown Automata</strong> yang dapat mengenalinya."</p>
+                </div>
+                <h3 class="mt-6">Kesimpulan:</h3>
+                <ul class="list-disc pl-5 text-lg space-y-2">
+                    <li>PDA adalah ekstensi dari FA dengan tambahan <strong>stack</strong>.</li>
+                    <li>Stack memberikan PDA <strong>kemampuan memori</strong> untuk mengenali CFL.</li>
+                    <li>PDA adalah jembatan antara mesin sederhana (FA) dan kompleks (Turing Machine).</li>
+                    <li>Mereka adalah fondasi teoretis untuk <strong>parsing</strong> dalam kompilator.</li>
+                </ul>
+            </div>
+            `,
+            // Slide 14: Terima Kasih
+            `
+            <div class="text-center slide-content">
+                <h1 class="text-6xl">Terima Kasih</h1>
+                <h2 class="text-4xl text-gray-400 mt-4">Ada pertanyaan?</h2>
+            </div>
+            `
+        ];
+
+        // --- LOGIKA PRESENTASI ---
+        let currentSlideIndex = 0;
+
+        const slideArea = document.getElementById('slide-area');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const slideCounter = document.getElementById('slide-counter');
+
+        function showSlide(index) {
+            // Pastikan index berada dalam rentang yang valid
+            if (index < 0 || index >= slides.length) {
+                return;
+            }
+            
+            currentSlideIndex = index;
+            
+            // Buat elemen slide baru
+            const slideElement = document.createElement('div');
+            slideElement.className = 'slide w-full h-full flex items-center justify-center';
+            slideElement.innerHTML = slides[index];
+
+            // Hapus slide lama dan tambahkan yang baru
+            slideArea.innerHTML = '';
+            slideArea.appendChild(slideElement);
+
+            // Trigger animasi
+            setTimeout(() => {
+                slideElement.classList.add('active');
+            }, 10);
+
+            updateControls();
+        }
+
+        function updateControls() {
+            // Update teks counter
+            slideCounter.textContent = `Slide ${currentSlideIndex + 1} dari ${slides.length}`;
+            
+            // Atur status tombol prev/next
+            prevBtn.disabled = currentSlideIndex === 0;
+            nextBtn.disabled = currentSlideIndex === slides.length - 1;
+        }
+
+        // Event Listeners untuk tombol
+        prevBtn.addEventListener('click', () => {
+            showSlide(currentSlideIndex - 1);
+        });
+
+        nextBtn.addEventListener('click', () => {
+            showSlide(currentSlideIndex + 1);
+        });
+        
+        // Event listener untuk keyboard (panah kiri/kanan)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                nextBtn.click();
+            } else if (e.key === 'ArrowLeft') {
+                prevBtn.click();
+            }
+        });
+
+        // Tampilkan slide pertama saat halaman dimuat
+        window.onload = () => {
+            showSlide(0);
+        };
+    </script>
+</body>
+</html>
